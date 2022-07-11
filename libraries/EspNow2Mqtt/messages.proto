@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+/*
+    messages used by client and server
+
+    compile with
+    protoc -I=. --cpp_out=lib ./messages.proto
+*/
+
+message request {
+  message Ping {
+      int32 num = 1;
+  }
+  message Send {
+      string queue = 1 ;
+      string payload = 2 ;
+      bool persist = 3;
+  }
+  message Subscribe {
+      string queue = 1;
+      bool clear = 2;
+  }
+  message Operation {
+      oneof op {
+          Ping ping=4;
+          Send send=5;
+          Subscribe qRequest=6;
+      }
+    }
+  string client_id = 1 ;
+  repeated Operation operations = 2 ;
+  int32 message_type = 3;
+}
+
+message response {
+    enum Result {
+        OK = 0; //sed, ping or crecevie ok
+        NO_MSG = 1; //no message on queue
+        NOK = 5; // error
+        NOMQTT = 7; //no mqtt error
+    } 
+    message OpResponse{
+        Result result_code = 1;
+        string payload = 2 ;
+    }
+    repeated OpResponse opResponses =1  ;
+    int32 message_type = 3;
+}
